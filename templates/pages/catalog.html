@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Catalog — Scarlet Roasters{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-end mb-3">
+  <h1 class="h2 mb-0">Catalog</h1>
+  <span class="text-muted">{{ count }} products &middot; retail prices</span>
+</div>
+
+<div class="table-responsive">
+<table class="table table-hover align-middle">
+  <thead class="table-light">
+    <tr><th>SKU</th><th>Product</th><th>Origin</th><th>Roast</th><th>Size</th><th class="text-end">Price</th></tr>
+  </thead>
+  <tbody>
+  {% for p in products %}
+    <tr>
+      <td class="text-nowrap"><code>{{ p.sku }}</code></td>
+      <td>{{ p.name }}</td>
+      <td>{{ p.origin|default:"—" }}</td>
+      <td>{% if p.roast %}<span class="badge text-bg-light border">{{ p.roast }}</span>{% else %}—{% endif %}</td>
+      <td>{{ p.size|default:"—" }}</td>
+      <td class="text-end">${{ p.retail_price|floatformat:2 }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+
+<p class="text-muted small">Wholesale customers: log in for your price list. (Coming in Week 9.)</p>
+{% endblock %}

@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Django
+db.sqlite3
+staticfiles/
+
+# Secrets and local environment — never commit these
+.env
+.env.*
+!.env.example
+
+# Vercel CLI
+.vercel/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store

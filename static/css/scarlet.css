@@ -1,0 +1,7 @@
+/* Scarlet Roasters — the one stylesheet. Bootstrap does the layout; this sets the brand. */
+:root { --scarlet: #CC0033; --ink: #2B1D16; --sand: #F1EBE3; }
+.bg-scarlet { background-color: var(--scarlet); }
+.btn-scarlet { background-color: var(--scarlet); color: #fff; border-color: var(--scarlet); }
+.btn-scarlet:hover { background-color: #a30029; color: #fff; }
+.hero { background-color: var(--sand); }
+h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; color: var(--ink); }

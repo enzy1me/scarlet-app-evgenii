@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Scarlet Roasters — fresh-roasted coffee, New Brunswick NJ{% endblock %}
+{% block content %}
+<div class="p-5 mb-4 rounded-3 hero">
+  <div class="container-fluid py-3">
+    <h1 class="display-5 fw-bold">Freshly roasted in New Brunswick. Ready for your next cup.</h1>
+    <p class="col-md-8 fs-5">Eight coffees, roasted in small batches in New Brunswick and delivered to cafés,
+      restaurants and grocers across central New Jersey — and to your door.</p>
+    <a class="btn btn-scarlet btn-lg" href="{% url 'catalog' %}">See the catalog</a>
+    <a class="btn btn-outline-dark btn-lg ms-2" href="{% url 'contact' %}">Wholesale inquiries</a>
+  </div>
+</div>
+
+<h2 class="h4 mb-3">This week's 12 oz bags</h2>
+<div class="row g-3">
+  {% for p in featured %}
+  <div class="col-sm-6 col-lg-3">
+    <div class="card h-100">
+      <div class="card-body">
+        <span class="badge text-bg-light border mb-2">{{ p.roast }}</span>
+        <h3 class="h5 card-title">{{ p.coffee }}</h3>
+        <p class="card-text text-muted mb-1">{{ p.origin }}</p>
+        <p class="card-text fw-bold">${{ p.retail_price|floatformat:2 }} <span class="fw-normal text-muted">/ 12 oz</span></p>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}
