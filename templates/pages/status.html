@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Status — Scarlet Roasters{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-end mb-3">
+  <h1 class="h2 mb-0">Status</h1>
+  <span class="text-muted">what this application is connected to, and whether it is in order</span>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="border rounded p-3 h-100 {% if not netid %}border-danger{% endif %}">
+      <div class="text-muted small">NetID</div>
+      {% if netid %}<div class="h3 mb-0 font-monospace">{{ netid }}</div>
+      {% else %}<div class="h5 mb-0 text-danger">NOT SET — add STUDENT_NETID</div>{% endif %}
+      <div class="text-muted small mt-1">N = {{ n }} (the digits of the NetID)</div>
+    </div>
+  </div>
+  <div class="col-md-5">
+    <div class="border rounded p-3 h-100 {% if not on_postgres %}border-danger{% endif %}">
+      <div class="text-muted small">Database</div>
+      <div class="font-monospace {% if not on_postgres %}text-danger{% endif %}">{{ database }}</div>
+      <div class="text-muted small mt-1">DEBUG {% if debug %}on (your laptop){% else %}off (production){% endif %}</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="border rounded p-3 h-100 {% if all_ok %}bg-success-subtle border-success{% else %}bg-warning-subtle{% endif %}">
+      <div class="text-muted small">Part 2</div>
+      <div class="h3 mb-0">{{ ok_rows }} of {{ total_rows }} tables in order</div>
+      <div class="small mt-1">order lines on the order's admin page: {% if inline_ok %}&#10003;{% else %}&#10007;{% endif %}</div>
+    </div>
+  </div>
+</div>
+
+{% if error %}<div class="alert alert-danger">The database could not be read: {{ error }}</div>{% endif %}
+
+<div class="table-responsive">
+<table class="table table-hover align-middle">
+  <thead class="table-light">
+    <tr><th>Table</th><th>Model</th><th class="text-end">Rows</th><th class="text-end">Expected</th><th class="text-end">Rows × N</th><th>Matches the table</th><th>In admin</th></tr>
+  </thead>
+  <tbody>
+  {% for r in rows %}
+    <tr class="{% if r.ok %}table-success{% endif %}">
+      <td><code>{{ r.table }}</code></td>
+      <td><code>{{ r.model }}</code></td>
+      <td class="text-end">{% if r.count is not None %}{{ r.count }}{% else %}—{% endif %}</td>
+      <td class="text-end text-muted">{{ r.expected }} {% if r.count_ok %}&#10003;{% elif r.count is not None %}<span class="text-danger">&#10007;</span>{% endif %}</td>
+      <td class="text-end">{% if r.times_n is not None %}{{ r.times_n }}{% else %}—{% endif %}</td>
+      <td>{% if r.match_ok %}&#10003; OK{% else %}<span class="text-danger">&#10007;</span>
+          <ul class="small mb-0 ps-3">{% for i in r.issues %}<li>{{ i }}</li>{% endfor %}</ul>{% endif %}</td>
+      <td>{% if r.in_admin %}&#10003;{% else %}<span class="text-danger">&#10007;</span>{% endif %}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+<p class="text-muted small">Rows are counted through the ORM (<code>Model.objects.count()</code>). "Matches the table" compares the model with the live table, column by column — the same check as <code>python manage.py checkmodels</code>. Nothing on this page writes to the database.</p>
+{% endblock %}

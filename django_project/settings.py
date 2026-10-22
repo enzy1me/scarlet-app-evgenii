@@ -1,20 +1,31 @@
 """
 Django settings for the Scarlet Roasters case-company app — 33:136:440.
 
-Week 5 starter. Three things here are different from what `startproject` gives you,
-and each one is marked with  # WEEK 5  so you can find it:
+Week 5 starter + the Week 6 edits. Everything that differs from what `startproject`
+gives you is marked  # WEEK 5  or  # WEEK 6  so you can find it:
 
-  1. SECRET_KEY and DEBUG come from the environment, not from this file.
-  2. ALLOWED_HOSTS / CSRF_TRUSTED_ORIGINS include *.vercel.app.
-  3. STATIC_ROOT is set, so Vercel runs collectstatic for you.
+  WEEK 5  1. SECRET_KEY and DEBUG come from the environment, not from this file.
+          2. ALLOWED_HOSTS / CSRF_TRUSTED_ORIGINS include *.vercel.app.
+          3. STATIC_ROOT is set, so Vercel runs collectstatic for you.
+  WEEK 6  4. The database is PostgreSQL, found through DATABASE_URL in the environment
+             (your .env file on the laptop, Vercel's environment variables in production).
+          5. The `operations` app: the eleven tables of schema v1.0 as models (managed = False:
+             the tables exist already; Django maps them, it does not create them).
 
-Everything else is Django's default. Read it once; you will edit it in Week 6.
+Everything else is Django's default.
 """
 
 import os
 from pathlib import Path
 
+import dj_database_url
+from dotenv import load_dotenv
+
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# WEEK 6 — read .env (git-ignored) into the environment, if it exists. On Vercel there is no
+# .env file; the variables are set in Project → Settings → Environment Variables.
+load_dotenv(BASE_DIR / ".env")
 
 # WEEK 5 — secrets stay out of the repository.
 # Locally the fallback is used. On Vercel, set SECRET_KEY in Project → Settings → Environment Variables.
@@ -37,7 +48,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "pages",  # WEEK 5 — our app
+    "pages",  # WEEK 5 — the public pages
+    "operations",  # WEEK 6 — the business: schema v1.0 as models
 ]
 
 MIDDLEWARE = [
@@ -69,12 +81,18 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "django_project.wsgi.application"  # Vercel reads this line to find the app
 
-# Database — untouched this week. Week 6 replaces this block with PostgreSQL (local + Neon).
+# WEEK 6 — the database. One connection string, DATABASE_URL, tells Django where it is:
+#   postgresql://USER:PASSWORD@HOST/DBNAME?sslmode=require        (your Neon project — the v1.0 database)
+# dj_database_url.config() reads it from the environment and turns it into the dictionary
+# Django wants. The same code runs on your laptop (.env) and on Vercel (environment variables):
+# configuration in the environment, code in the repository, secrets in neither.
+# If DATABASE_URL is not set, Django falls back to SQLite so the project still starts —
+# but then every table is empty and the catalog page is blank. Set it.
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    "default": dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
+        conn_max_age=0,            # one connection per request: right for Vercel's serverless functions
+    )
 }
 
 AUTH_PASSWORD_VALIDATORS = [

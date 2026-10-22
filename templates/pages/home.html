@@ -17,9 +17,9 @@
   <div class="col-sm-6 col-lg-3">
     <div class="card h-100">
       <div class="card-body">
-        <span class="badge text-bg-light border mb-2">{{ p.roast }}</span>
+        <span class="badge text-bg-light border mb-2">{{ p.coffee.roast_level }}</span>
         <h3 class="h5 card-title">{{ p.coffee }}</h3>
-        <p class="card-text text-muted mb-1">{{ p.origin }}</p>
+        <p class="card-text text-muted mb-1">{{ p.coffee.origin }}</p>
         <p class="card-text fw-bold">${{ p.retail_price|floatformat:2 }} <span class="fw-normal text-muted">/ 12 oz</span></p>
       </div>
     </div>

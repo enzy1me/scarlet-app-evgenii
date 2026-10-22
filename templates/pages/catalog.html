@@ -15,9 +15,9 @@
   {% for p in products %}
     <tr>
       <td class="text-nowrap"><code>{{ p.sku }}</code></td>
-      <td>{{ p.name }}</td>
-      <td>{{ p.origin|default:"—" }}</td>
-      <td>{% if p.roast %}<span class="badge text-bg-light border">{{ p.roast }}</span>{% else %}—{% endif %}</td>
+      <td>{{ p.product_name }}</td>
+      <td>{{ p.coffee.origin|default:"—" }}</td>
+      <td>{% if p.coffee %}<span class="badge text-bg-light border">{{ p.coffee.roast_level }}</span>{% else %}—{% endif %}</td>
       <td>{{ p.size|default:"—" }}</td>
       <td class="text-end">${{ p.retail_price|floatformat:2 }}</td>
     </tr>
