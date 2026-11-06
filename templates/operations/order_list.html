@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Orders — Scarlet Roasters{% endblock %}
+{% block content %}
+{% include "operations/_backoffice.html" %}
+<h1 class="h2">Orders</h1>
+{# One tab per status: the states of the state machine, with how many orders are in each right now. #}
+<ul class="nav nav-tabs mb-3">
+  {% for s, n in tabs %}
+    <li class="nav-item"><a class="nav-link {% if s == status %}active fw-semibold{% endif %}" href="?status={{ s }}">{{ s }} <span class="badge text-bg-secondary">{{ n }}</span></a></li>
+  {% endfor %}
+</ul>
+<div class="table-responsive">
+<table class="table table-hover align-middle">
+  <thead class="table-light"><tr><th>Order</th><th>Date</th><th>Customer</th><th>Type</th><th class="text-end">Total</th></tr></thead>
+  <tbody>
+  {% for o in orders %}
+    <tr>
+      <td><a href="{% url 'order_detail' o.pk %}">{{ o.order_no }}</a></td>
+      <td>{{ o.order_date }}</td>
+      <td>{{ o.customer.customer_name }}</td>
+      <td>{{ o.customer.customer_type }}</td>
+      <td class="text-end">${{ o.total|floatformat:2 }}</td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="5" class="text-muted">No {{ status }} orders.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% if page_obj.has_other_pages %}
+<nav class="d-flex gap-2">
+  {% if page_obj.has_previous %}<a class="btn btn-outline-secondary btn-sm" href="?status={{ status }}&page={{ page_obj.previous_page_number }}">Previous</a>{% endif %}
+  <span class="align-self-center small text-muted">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}<a class="btn btn-outline-secondary btn-sm" href="?status={{ status }}&page={{ page_obj.next_page_number }}">Next</a>{% endif %}
+</nav>
+{% endif %}
+{% endblock %}

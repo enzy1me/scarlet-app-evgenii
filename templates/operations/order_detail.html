@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}{{ order.order_no }} — Scarlet Roasters{% endblock %}
+{% block content %}
+{% include "operations/_backoffice.html" %}
+<div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+  <h1 class="h2 mb-0">{{ order.order_no }}</h1>
+  <span class="badge fs-6 {% if order.status == 'Cancelled' %}text-bg-secondary{% elif order.status == 'Paid' %}text-bg-success{% else %}text-bg-warning{% endif %}">{{ order.status }}</span>
+  <a class="ms-auto small" href="{% url 'order_list' %}?status={{ order.status }}">All {{ order.status }} orders</a>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-7">
+    <dl class="row mb-2">
+      <dt class="col-sm-4">Customer</dt><dd class="col-sm-8"><a href="{% url 'customer_detail' order.customer_id %}">{{ order.customer }}</a> · {{ order.customer.customer_type }}</dd>
+      <dt class="col-sm-4">Order date</dt><dd class="col-sm-8">{{ order.order_date }}</dd>
+      <dt class="col-sm-4">Ship to</dt><dd class="col-sm-8">{{ order.ship_to_address }}</dd>
+      <dt class="col-sm-4">Taken by</dt><dd class="col-sm-8">{{ order.taken_by|default:"web shop" }}</dd>
+    </dl>
+    <table class="table table-sm align-middle">
+      <thead class="table-light"><tr><th>#</th><th>Product</th><th>Grind</th><th class="text-end">Qty</th><th class="text-end">Unit price</th><th class="text-end">Line total</th></tr></thead>
+      <tbody>
+      {% for line in lines %}
+        <tr><td>{{ line.line_no }}</td><td>{{ line.product.product_name }}</td><td>{{ line.grind|default:"—" }}</td>
+            <td class="text-end">{{ line.qty }}</td><td class="text-end">${{ line.unit_price }}</td><td class="text-end">${{ line.line_total|floatformat:2 }}</td></tr>
+      {% endfor %}
+      </tbody>
+      <tfoot><tr><th colspan="5" class="text-end">Total</th><th class="text-end">${{ total|floatformat:2 }}</th></tr></tfoot>
+    </table>
+  </div>
+
+  <div class="col-lg-5">
+    {# The moves. Each button asks workflow.refusal(): green = you may make this move now; grey = the reason it would be refused. #}
+    <div class="border rounded p-3 mb-3">
+      <div class="fw-semibold">Move this order</div>
+      <div class="small text-muted mb-2">Rule 5: Draft → Confirmed → Shipped → Invoiced → Paid · cancel only while Draft or Confirmed.<br>
+        <span class="text-success">Green</span>: you may make this move now. Grey: it would be refused — the reason is next to it.</div>
+      {% for m in moves %}
+        <form method="post" action="{% url 'order_move' order.pk %}" class="js-move d-flex align-items-start gap-2 mb-2">
+          {% csrf_token %}<input type="hidden" name="to" value="{{ m.to }}">
+          <button type="submit" class="btn btn-sm {% if m.refusal %}btn-outline-secondary{% else %}btn-success{% endif %}" style="min-width: 11.5rem">{{ m.verb }} → {{ m.to }}</button>
+          <span class="small {% if m.refusal %}text-muted{% else %}text-success{% endif %}">{% if m.refusal %}{{ m.refusal }}{% else %}Allowed for you now · job of {{ m.who }}{% endif %}</span>
+        </form>
+      {% endfor %}
+    </div>
+    <div class="border rounded p-3">
+      <div class="fw-semibold mb-2">History — who moved this order</div>
+      {% for e in history %}
+        <div class="small">{{ e.action_time|date:"M j, H:i" }} · <strong>{{ e.change_message }}</strong> · by {{ e.user.get_username }}</div>
+      {% empty %}
+        <div class="small text-muted">No moves recorded yet. (Moves made before Week 9 were made in the spreadsheet.)</div>
+      {% endfor %}
+      {# The documents this order has — each one written by a move: Ship, Invoice, Record payment. #}
+      {% if order.shipment %}<div class="small mt-2 text-muted">Shipment #{{ order.shipment.shipment_id }}: {{ order.shipment.ship_date }} by {{ order.shipment.carrier }}</div>{% endif %}
+      {% if order.invoice %}<div class="small text-muted">Invoice {{ order.invoice.invoice_no }}: {{ order.invoice.invoice_date }}</div>{% endif %}
+      {% for p in order.payments.all %}<div class="small text-muted">Payment #{{ p.payment_id }}: {{ p.paid_date }}</div>{% endfor %}
+    </div>
+  </div>
+</div>
+<script>
+  /* One click, one request: after the first click on a move, every move button turns off until the next page
+     arrives, so a double-click does not send the same move twice. Only a convenience: the server still checks
+     every request (the grey buttons send theirs). Two requests in the same moment are still possible, from two
+     tabs or two clerks; that is next week's topic, transactions. */
+  document.querySelectorAll("form.js-move").forEach(function (form) {
+    form.addEventListener("submit", function () {
+      setTimeout(function () {
+        document.querySelectorAll("form.js-move button").forEach(function (b) { b.disabled = true; });
+      }, 0);
+    });
+  });
+</script>
+{% endblock %}

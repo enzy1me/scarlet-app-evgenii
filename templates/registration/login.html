@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Log in — Scarlet Roasters{% endblock %}
+{% block content %}
+{# WEEK 9 — Django's own LoginView shows this template at /accounts/login/. It checks the       #}
+{# username and password against auth_user, starts a session, and sends you back to "next".   #}
+<div class="row justify-content-center">
+  <div class="col-md-6 col-lg-4">
+    <h1 class="h3 mb-3">Staff log in</h1>
+    {% if form.errors %}<div class="alert alert-danger">That username and password do not match. Try again.</div>{% endif %}
+    {% if next and user.is_authenticated %}<div class="alert alert-warning">You are logged in as {{ user.get_username }}, who may not open that page.</div>{% endif %}
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <div class="mb-3"><label class="form-label" for="id_username">Username</label>
+        <input class="form-control" type="text" name="username" id="id_username" autofocus autocomplete="username" value="{{ form.username.value|default:'' }}"></div>
+      <div class="mb-3"><label class="form-label" for="id_password">Password</label>
+        <input class="form-control" type="password" name="password" id="id_password" autocomplete="current-password"></div>
+      <input type="hidden" name="next" value="{{ next|default:'/orders/' }}">
+      <button class="btn btn-scarlet w-100" type="submit">Log in</button>
+    </form>
+    <p class="text-muted small mt-3">The back office of Scarlet Roasters. Customers and orders are for staff only.</p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}{% if object %}Edit {{ object.customer_name }}{% else %}New customer{% endif %} — Scarlet Roasters{% endblock %}
+{% block content %}
+{% include "operations/_backoffice.html" %}
+<h1 class="h2">{% if object %}Edit {{ object.customer_name }}{% else %}New customer{% endif %}</h1>
+{# One template for New and Edit. GET shows the form; POST sends it back; is_valid() decides. #}
+<form method="post" class="col-lg-8" novalidate>
+  {% csrf_token %}
+  {% for error in form.non_field_errors %}<div class="alert alert-danger">{{ error }}</div>{% endfor %}
+  {% for field in form %}
+    <div class="mb-3">
+      <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+    </div>
+  {% endfor %}
+  <button class="btn btn-scarlet" type="submit">Save</button>
+  <a class="btn btn-link" href="{% if object %}{% url 'customer_detail' object.pk %}{% else %}{% url 'customer_list' %}{% endif %}">Cancel</a>
+</form>
+{% endblock %}

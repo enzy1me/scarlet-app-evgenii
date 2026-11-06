@@ -1,0 +1,19 @@
+{# WEEK 9 — the bar at the top of every back-office page: where you are, who you are, and the messages. #}
+<div class="d-flex flex-wrap align-items-center gap-2 border rounded px-3 py-2 mb-3 bg-light small">
+  <span class="fw-semibold text-uppercase text-muted me-2">Back office</span>
+  <a class="btn btn-sm {% if 'customer' in request.resolver_match.url_name %}btn-dark{% else %}btn-outline-dark{% endif %}" href="{% url 'customer_list' %}">Customers</a>
+  <a class="btn btn-sm {% if 'order' in request.resolver_match.url_name %}btn-dark{% else %}btn-outline-dark{% endif %}" href="{% url 'order_list' %}">Orders</a>
+  <span class="ms-auto">
+    Logged in as <strong>{{ user.get_username }}</strong>
+    {% if user.is_superuser %}(superuser){% else %}({% for g in user.groups.all %}{{ g.name }}{% if not forloop.last %}, {% endif %}{% empty %}no role{% endfor %}){% endif %}
+  </span>
+  {# Log out is a POST with its token (a link could be triggered by another site). next = this same page: it needs a  #}
+  {# log-in, so the log-in page comes back, and whoever logs in next lands right here (Lab E: daniel, priya, tom). #}
+  <form method="post" action="{% url 'logout' %}" class="d-inline">
+    {% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}">
+    <button class="btn btn-sm btn-outline-secondary" type="submit">Log out</button>
+  </form>
+</div>
+{% for message in messages %}
+  <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}">{{ message }}</div>
+{% endfor %}

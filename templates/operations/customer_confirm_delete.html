@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Delete {{ object.customer_name }} — Scarlet Roasters{% endblock %}
+{% block content %}
+{% include "operations/_backoffice.html" %}
+<h1 class="h2">Delete {{ object.customer_name }}?</h1>
+<p>This removes the customer from the database. It cannot be undone.</p>
+<form method="post">
+  {% csrf_token %}
+  <button class="btn btn-danger" type="submit">Yes, delete</button>
+  <a class="btn btn-link" href="{% url 'customer_detail' object.pk %}">Cancel</a>
+</form>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}{{ customer.customer_name }} — Scarlet Roasters{% endblock %}
+{% block content %}
+{% include "operations/_backoffice.html" %}
+<h1 class="h2">{{ customer.customer_name }} <span class="text-muted fs-5">#{{ customer.customer_id }}</span></h1>
+<dl class="row">
+  <dt class="col-sm-3">Type</dt><dd class="col-sm-9">{{ customer.customer_type }}</dd>
+  <dt class="col-sm-3">Contact</dt><dd class="col-sm-9">{{ customer.contact_name|default:"—" }}</dd>
+  <dt class="col-sm-3">Email</dt><dd class="col-sm-9">{{ customer.email|default:"—" }}</dd>
+  <dt class="col-sm-3">Phone</dt><dd class="col-sm-9">{{ customer.phone|default:"—" }}</dd>
+  <dt class="col-sm-3">Credit limit</dt><dd class="col-sm-9">{% if customer.credit_limit is not None %}${{ customer.credit_limit|floatformat:2 }}{% else %}—{% endif %}</dd>
+  <dt class="col-sm-3">Payment terms</dt><dd class="col-sm-9">{{ customer.payment_terms|default:"—" }}</dd>
+  <dt class="col-sm-3">Resale certificate</dt><dd class="col-sm-9">{{ customer.resale_cert|default:"—" }}</dd>
+  <dt class="col-sm-3">Customer since</dt><dd class="col-sm-9">{{ customer.customer_since|default:"—" }}</dd>
+  <dt class="col-sm-3">Orders</dt><dd class="col-sm-9">{{ customer.orders.count }}</dd>
+</dl>
+<a class="btn btn-scarlet" href="{% url 'customer_update' customer.pk %}">Edit</a>
+<a class="btn btn-outline-danger" href="{% url 'customer_delete' customer.pk %}">Delete</a>
+<a class="btn btn-link" href="{% url 'customer_list' %}">All customers</a>
+{% endblock %}

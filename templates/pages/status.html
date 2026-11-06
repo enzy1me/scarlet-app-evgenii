@@ -15,16 +15,24 @@
       <div class="text-muted small mt-1">N = {{ n }} (the digits of the NetID)</div>
     </div>
   </div>
-  <div class="col-md-5">
+  <div class="col-md-3">
     <div class="border rounded p-3 h-100 {% if not on_postgres %}border-danger{% endif %}">
       <div class="text-muted small">Database</div>
-      <div class="font-monospace {% if not on_postgres %}text-danger{% endif %}">{{ database }}</div>
+      <div class="font-monospace small {% if not on_postgres %}text-danger{% endif %}" style="word-break: break-all">{{ database }}</div>
       <div class="text-muted small mt-1">DEBUG {% if debug %}on (your laptop){% else %}off (production){% endif %}</div>
+      <div class="small">SECRET_KEY {% if secret_from_env %}from the environment &#10003;{% elif debug %}<span class="text-muted">development fallback (fine on a laptop)</span>{% else %}<span class="text-danger">&#10007; the fallback from settings.py — set SECRET_KEY on Vercel</span>{% endif %}</div>
     </div>
   </div>
-  <div class="col-md-4">
+  <div class="col-md-3">
+    <div class="border rounded p-3 h-100 {% if all_rules_ok %}bg-success-subtle border-success{% else %}bg-warning-subtle{% endif %}">
+      <div class="text-muted small">Part 3 · the rules</div>
+      <div class="h3 mb-0">{{ ok_checks }} of {{ total_checks }} rules in place</div>
+      <div class="small mt-1">forms, workflow, roles — Week 9</div>
+    </div>
+  </div>
+  <div class="col-md-3">
     <div class="border rounded p-3 h-100 {% if all_ok %}bg-success-subtle border-success{% else %}bg-warning-subtle{% endif %}">
-      <div class="text-muted small">Part 2</div>
+      <div class="text-muted small">Part 2 · the tables</div>
       <div class="h3 mb-0">{{ ok_rows }} of {{ total_rows }} tables in order</div>
       <div class="small mt-1">order lines on the order's admin page: {% if inline_ok %}&#10003;{% else %}&#10007;{% endif %}</div>
     </div>
@@ -33,6 +41,28 @@
 
 {% if error %}<div class="alert alert-danger">The database could not be read: {{ error }}</div>{% endif %}
 
+<h2 class="h4 mt-2">Part 3 · the rules</h2>
+<p class="text-muted small mb-2">Each row runs your code live: the form is asked <code>is_valid()</code> without saving, the workflow is asked <code>refusal()</code> without moving anything. <em>Checked in</em> says where this project checks the rule: the database, the form, the model layer (<code>workflow.py</code>), or a permission (the log-in and the staff groups).</p>
+<div class="table-responsive mb-4">
+<table class="table table-hover align-middle">
+  <thead class="table-light">
+    <tr><th style="width:2.5rem">#</th><th>Check</th><th>Rule</th><th>Checked in</th><th>Result</th></tr>
+  </thead>
+  <tbody>
+  {% for c in checks %}
+    <tr class="{% if c.ok %}table-success{% endif %}">
+      <td class="text-muted">{{ forloop.counter }}</td>
+      <td>{{ c.label }}</td>
+      <td class="text-nowrap">{{ c.rule }}</td>
+      <td class="text-nowrap">{{ c.layer }}</td>
+      <td>{% if c.ok %}&#10003;{% else %}<span class="text-danger">&#10007;</span>{% endif %} <span class="small">{{ c.detail }}</span></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+
+<h2 class="h4">Part 2 · the tables</h2>
 <div class="table-responsive">
 <table class="table table-hover align-middle">
   <thead class="table-light">
@@ -44,7 +74,7 @@
       <td><code>{{ r.table }}</code></td>
       <td><code>{{ r.model }}</code></td>
       <td class="text-end">{% if r.count is not None %}{{ r.count }}{% else %}—{% endif %}</td>
-      <td class="text-end text-muted">{{ r.expected }} {% if r.count_ok %}&#10003;{% elif r.count is not None %}<span class="text-danger">&#10007;</span>{% endif %}</td>
+      <td class="text-end text-muted">{{ r.expected }}{% if r.added %} <span class="small">(+{{ r.added }} new)</span>{% endif %} {% if r.count_ok %}&#10003;{% elif r.count is not None %}<span class="text-danger">&#10007;</span>{% endif %}</td>
       <td class="text-end">{% if r.times_n is not None %}{{ r.times_n }}{% else %}—{% endif %}</td>
       <td>{% if r.match_ok %}&#10003; OK{% else %}<span class="text-danger">&#10007;</span>
           <ul class="small mb-0 ps-3">{% for i in r.issues %}<li>{{ i }}</li>{% endfor %}</ul>{% endif %}</td>
@@ -54,5 +84,5 @@
   </tbody>
 </table>
 </div>
-<p class="text-muted small">Rows are counted through the ORM (<code>Model.objects.count()</code>). "Matches the table" compares the model with the live table, column by column — the same check as <code>python manage.py checkmodels</code>. Nothing on this page writes to the database.</p>
+<p class="text-muted small">Rows are counted through the ORM (<code>Model.objects.count()</code>). "+ new" are rows your application wrote in Part 3: customers created through the form, and the shipments, invoices and payments that order moves create. "Matches the table" compares the model with the live table, column by column — the same check as <code>python manage.py checkmodels</code>. Nothing on this page writes to the database.</p>
 {% endblock %}
